@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Restaurant Menu — Tabs + Nested Accordions + Global Search</title>
+  <style>
+    :root{
+      --accent:#ff7043;
+      --accent-dark:#e85c30;
+      --bg:#f8f8f8;
+      --card:#fff;
+      --text:#333;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      padding:20px;
+      font-family:Inter,system-ui,Arial,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+
+    h1{
+      text-align:center;
+      margin:0 0 12px;
+    }
+
+    /* Search */
+    #searchBox{
+      display:block;
+      margin:0 auto 18px auto;
+      width:92%;
+      max-width:640px;
+      padding:12px 14px;
+      font-size:16px;
+      border:2px solid #e6e6e6;
+      border-radius:10px;
+      background:white;
+    }
+
+    /* Tabs */
+    .tabs{
+      display:flex;
+      justify-content:center;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-bottom:18px;
+    }
+    .tab-button{
+      border:0;
+      padding:10px 16px;
+      border-radius:10px;
+      background:#efefef;
+      cursor:pointer;
+      font-weight:600;
+      transition:all .18s ease;
+    }
+    .tab-button.active{
+      background:var(--accent);
+      color:#fff;
+      box-shadow:0 6px 18px rgba(0,0,0,0.08);
+    }
+
+    /* Tab content wrapper */
+    .tab-content{
+      display:none;
+      animation:fadeIn .25s ease both;
+      max-width:900px;
+      margin:0 auto 30px auto;
+    }
+    .tab-content.active{
+      display:block;
+    }
+
+    @keyframes fadeIn {
+      from{opacity:0; transform:translateY(6px)}
+      to{opacity:1; transform:none}
+    }
+
+    /* Accordion button */
+    .accordion{
+      width:100%;
+      text-align:left;
+      padding:12px 16px;
+      background:var(--accent);
+      color:#fff;
+      border:0;
+      border-radius:8px;
+      margin:8px 0 6px 0;
+      font-size:15px;
+      cursor:pointer;
+      outline:none;
+      transition:background .12s ease;
+    }
+    .accordion:hover{background:var(--accent-dark)}
+    .accordion.active{background:var(--accent-dark)}
+
+    /* Accordion panel (collapsed via max-height) */
+    .panel{
+      background:var(--card);
+      border-radius:8px;
+      box-shadow:0 6px 18px rgba(0,0,0,0.06);
+      overflow:hidden;
+      max-height:0;              /* collapsed by default */
+      transition:max-height .28s ease;
+      margin-bottom:10px;
+      padding:0 12px;           /* small side padding to match tables */
+    }
+    .panel.open{
+      /* max-height is set inline via JS to the content scrollHeight */
+    }
+
+    /* Table style inside panels */
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin:10px 0;
+    }
+    thead th{
+      background:var(--accent);
+      color:#fff;
+      padding:10px;
+      text-align:left;
+      font-size:15px;
+      border-radius:4px;
+    }
+    tbody td{
+      padding:10px;
+      border-bottom:1px solid #f0f0f0;
+      font-size:15px;
+    }
+    tbody tr:last-child td{border-bottom:0}
+    .price{
+      text-align:right;
+      font-weight:700;
+      color:#333;
+      white-space:nowrap;
+    }
+
+    /* No results message */
+    .no-results {
+      text-align:center;
+      padding:14px;
+      color:#777;
+      font-style:italic;
+    }
+
+    /* small screens */
+    @media (max-width:520px){
+      .tab-button{font-size:14px; padding:8px 12px}
+      thead th, tbody td{font-size:14px}
+      #searchBox{width:96%}
+    }
+  </style>
+</head>
+<body>
+  <h1>🍽️ Our Restaurant Menu</h1>
+
+  <input id="searchBox" type="search" placeholder="Search menu items (e.g. 'pizza', 'vodka', 'cheese')">
+
+  <!-- Tabs -->
+  <div class="tabs" role="tablist" aria-label="Menu categories">
+    <button class="tab-button active" data-tab="starters" aria-controls="starters">Starters</button>
+    <button class="tab-button" data-tab="mains" aria-controls="mains">Mains</button>
+    <button class="tab-button" data-tab="drinks" aria-controls="drinks">Drinks</button>
+    <button class="tab-button" data-tab="desserts" aria-controls="desserts">Desserts</button>
+  </div>
+
+  <!-- STARTERS TAB -->
+  <div id="starters" class="tab-content active" role="region" aria-labelledby="starters">
+    <button class="accordion" type="button">Soups</button>
+    <div class="panel">
+      <table>
+        <thead><tr><th>Dish</th><th class="price">Price</th></tr></thead>
+        <tbody>
+          <tr><td>Tomato Soup</td><td class="price">$5.00</td></tr>
+          <tr><td>Chicken Soup</td><td class="price">$6.00</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <button class="accordion" type="button">Light Bites</button>
+    <div class="panel">
+      <table>
+        <thead><tr><th>Dish</th><th class="price">Price</th></tr></thead>
+        <tbody>
+          <tr><td>Garlic Bread</td><td class="price">$4.50</td></tr>
+          <tr><td>Bruschetta</td><td class="price">$6.25</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- MAINS TAB -->
+  <div id="mains" class="tab-content" role="region" aria-labelledby="mains">
+    <button class="accordion" type="button">Pasta</button>
+    <div class="panel">
+      <table>
+        <thead><tr><th>Dish</th><th class="price">Price</th></tr></thead>
+        <tbody>
+          <tr><td>Spaghetti Carbonara</td><td class="price">$10.50</td></tr>
+          <tr><td>Penne Alfredo</td><td class="price">$11.00</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <button class="accordion" type="button">Grills</button>
+    <div class="panel">
+      <table>
+        <thead><tr><th>Dish</th><th class="price">Price</th></tr></thead>
+        <tbody>
+          <tr><td>Grilled Chicken with Veggies</td><td class="price">$12.99</td></tr>
+          <tr><td>Beef Burger with Fries</td><td class="price">$11.25</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- DRINKS TAB -->
+  <div id="drinks" class="tab-content" role="region" aria-labelledby="drinks">
+    <button class="accordion" type="button">Beers</button>
+    <div class="panel">
+      <table>
+        <thead><tr><th>Beverage</th><th class="price">Price</th></tr></thead>
+        <tbody>
+          <tr><td>Heineken</td><td class="price">$3.50</td></tr>
+          <tr><td>Budweiser</td><td class="price">$3.25</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <button class="accordion" type="button">Whiskeys</button>
+    <div class="panel">
+      <table>
+        <thead><tr><th>Beverage</th><th class="price">Price</th></tr></thead>
+        <tbody>
+          <tr><td>Jack Daniels</td><td class="price">$6.50</td></tr>
+          <tr><td>Jameson</td><td class="price">$5.75</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <button class="accordion" type="button">Spirits</button>
+    <div class="panel">
+      <table>
+        <thead><tr><th>Beverage</th><th class="price">Price</th></tr></thead>
+        <tbody>
+          <tr><td>Vodka</td><td class="price">$5.00</td></tr>
+          <tr><td>Gin</td><td class="price">$4.75</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- DESSERTS TAB -->
+  <div id="desserts" class="tab-content" role="region" aria-labelledby="desserts">
+    <button class="accordion" type="button">Cakes</button>
+    <div class="panel">
+      <table>
+        <thead><tr><th>Dessert</th><th class="price">Price</th></tr></thead>
+        <tbody>
+          <tr><td>Chocolate Lava Cake</td><td class="price">$5.75</td></tr>
+          <tr><td>Cheesecake Slice</td><td class="price">$5.50</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <button class="accordion" type="button">Ice Creams</button>
+    <div class="panel">
+      <table>
+        <thead><tr><th>Dessert</th><th class="price">Price</th></tr></thead>
+        <tbody>
+          <tr><td>Vanilla Ice Cream</td><td class="price">$4.00</td></tr>
+          <tr><td>Fruit Salad Bowl</td><td class="price">$4.75</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    /* ---------- Tabs ---------- */
+    const tabButtons = Array.from(document.querySelectorAll('.tab-button'));
+    const tabContents = Array.from(document.querySelectorAll('.tab-content'));
+
+    function activateTab(tabId){
+      // set active button
+      tabButtons.forEach(b => {
+        if (b.dataset.tab === tabId) b.classList.add('active');
+        else b.classList.remove('active');
+      });
+      // show/hide content
+      tabContents.forEach(c => {
+        if (c.id === tabId) c.classList.add('active');
+        else c.classList.remove('active');
+      });
+      // ensure window scroll to top of content (nice UX on mobile)
+      const el = document.getElementById(tabId);
+      if (el) el.scrollIntoView({behavior:'smooth', block:'start'});
+    }
+
+    tabButtons.forEach(btn => {
+      btn.addEventListener('click', () => activateTab(btn.dataset.tab));
+    });
+
+    /* ---------- Accordions ---------- */
+    const accordions = Array.from(document.querySelectorAll('.accordion'));
+    accordions.forEach(acc => {
+      acc.addEventListener('click', () => {
+        const panel = acc.nextElementSibling;
+        const isOpen = panel.classList.contains('open');
+
+        if (isOpen){
+          panel.classList.remove('open');
+          acc.classList.remove('active');
+          panel.style.maxHeight = '0px';
+        } else {
+          // open
+          panel.classList.add('open');
+          acc.classList.add('active');
+          // ensure all inner tables are visible (so height measured correctly)
+          Array.from(panel.querySelectorAll('table')).forEach(t => t.style.display = '');
+          panel.style.maxHeight = panel.scrollHeight + 'px';
+        }
+      });
+    });
+
+    // on window resize, adjust open panels to new heights
+    window.addEventListener('resize', () => {
+      document.querySelectorAll('.panel.open').forEach(panel => {
+        panel.style.maxHeight = panel.scrollHeight + 'px';
+      });
+    });
+
+    /* ---------- Global Search ---------- */
+    const searchBox = document.getElementById('searchBox');
+
+    function resetFiltering(){
+      // show all rows, collapse panels (but keep user-open panels closed)
+      document.querySelectorAll('tbody tr').forEach(r => r.style.display = '');
+      document.querySelectorAll('table').forEach(t => t.style.display = '');
+      // collapse panels
+      document.querySelectorAll('.panel').forEach(panel => {
+        panel.classList.remove('open');
+        panel.style.maxHeight = '0px';
+        const accBtn = panel.previousElementSibling;
+        if (accBtn && accBtn.classList.contains('accordion')) accBtn.classList.remove('active');
+      });
+      // hide any "no results" messages (we will create on demand)
+      document.querySelectorAll('.no-results').forEach(n => n.remove());
+    }
+
+    function performSearch(query){
+      query = query.trim().toLowerCase();
+      if (!query){
+        resetFiltering();
+        return;
+      }
+
+      // track first matched tab to focus
+      let firstMatchTabId = null;
+      // iterate panels
+      const panels = Array.from(document.querySelectorAll('.panel'));
+      panels.forEach(panel => {
+        const table = panel.querySelector('table');
+        if (!table) return;
+        const rows = Array.from(table.querySelectorAll('tbody tr'));
+        let anyVisible = false;
+
+        rows.forEach(row => {
+          const text = row.textContent.toLowerCase();
+          if (text.includes(query)){
+            row.style.display = ''; // show row
+            anyVisible = true;
+          } else {
+            row.style.display = 'none';
+          }
+        });
+
+        if (anyVisible){
+          // ensure table visible
+          table.style.display = '';
+          // open this panel
+          panel.classList.add('open');
+          panel.style.maxHeight = panel.scrollHeight + 'px';
+          const accBtn = panel.previousElementSibling;
+          if (accBtn && accBtn.classList.contains('accordion')) accBtn.classList.add('active');
+
+          // determine parent tab, store first match
+          const tab = panel.closest('.tab-content');
+          if (tab && !firstMatchTabId) firstMatchTabId = tab.id;
+        } else {
+          // hide table and collapse panel
+          table.style.display = 'none';
+          panel.classList.remove('open');
+          panel.style.maxHeight = '0px';
+          const accBtn = panel.previousElementSibling;
+          if (accBtn && accBtn.classList.contains('accordion')) accBtn.classList.remove('active');
+        }
+      });
+
+      // For each tab, if no panels showed results, show a "no-results" row inside it.
+      tabContents.forEach(tab => {
+        // remove old no-results nodes
+        tab.querySelectorAll('.no-results').forEach(n => n.remove());
+
+        // check if any visible table rows exist in this tab
+        const hasVisible = tab.querySelectorAll('tbody tr').length
+          ? Array.from(tab.querySelectorAll('tbody tr')).some(r => r.style.display !== 'none')
+          : false;
+
+        if (!hasVisible){
+          // insert a small "no results" message at the end of tab
+          const msg = document.createElement('div');
+          msg.className = 'no-results';
+          msg.textContent = 'No results in this section.';
+          tab.appendChild(msg);
+        }
+      });
+
+      // if we found matches in a different tab, switch to the first matched tab
+      if (firstMatchTabId) activateTab(firstMatchTabId);
+    }
+
+    // debounce helper to avoid too many recalculations while typing
+    function debounce(fn, delay=180){
+      let t;
+      return (...args) => {
+        clearTimeout(t);
+        t = setTimeout(()=>fn(...args), delay);
+      };
+    }
+
+    searchBox.addEventListener('input', debounce(e => {
+      performSearch(e.target.value || '');
+    }, 120));
+
+    // initialize: ensure all panels collapsed
+    resetFiltering();
+  </script>
+</body>
+</html>
